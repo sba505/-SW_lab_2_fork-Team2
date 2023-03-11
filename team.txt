@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define NUM_THREADS 3
+
+// Global variables to hold the results
+double average = 0;
+int min = 0;
+int max = 0;
+
+// Array to hold the input numbers
+int *numbers;
+int numCount = 0;
+
+void *average_thread(void *arg) {
+    double sum = 0;
+    for (int i = 0; i < numCount; i++) {
+        sum += numbers[i];
+    }
+    average = sum / numCount;
+    pthread_exit(NULL);
+}
+
+void *min_thread(void *arg) {
+    min = numbers[0];
+    for (int i = 1; i < numCount; i++) {
+        if (numbers[i] < min) {
+            min = numbers[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+void *max_thread(void *arg) {
+    max = numbers[0];
+    for (int i = 1; i < numCount; i++) {
+        if (numbers[i] > max) {
+            max = numbers[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+int main(int argc, char *argv[]) {
+    // Check for correct number of arguments
+    if (argc < 2) {
+        printf("Usage: %s num1 num2 ...\n", argv[0]);
+        return 1;
+    }
+
+    // Allocate memory for the numbers array
+    numCount = argc - 1;
+    numbers = (int *)malloc(sizeof(int) * numCount);
+
+    // Parse the input numbers
+    for (int i = 0; i < numCount; i++) {
+        numbers[i] = atoi(argv[i + 1]);
+    }
+
+    // Create the threads
+    pthread_t threads[NUM_THREADS];
+    pthread_create(&threads[0], NULL, average_thread, NULL);
+    pthread_create(&threads[1], NULL, min_thread, NULL);
+    pthread_create(&threads[2], NULL, max_thread, NULL);
+
+    // Wait for the threads to finish
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Print the results
+    printf("The average value is %lf\n", average);
+    printf("The minimum value is %d\n", min);
+    printf("The maximum value is %d\n", max);
+
+    // Free the memory allocated for the numbers array
+    free(numbers);
+
+    return 0;
+} 
