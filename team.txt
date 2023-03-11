@@ -6,7 +6,7 @@
 
 // Global variables to hold the results
 double average = 0;
-int min = 0;
+int min = 1;
 int max = 0;
 
 // Array to hold the input numbers
